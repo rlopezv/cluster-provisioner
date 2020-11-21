@@ -1,0 +1,10 @@
+---
+ - hosts: all
+   # Become root user
+   become: yes
+   # List of tasks to be executed
+   tasks:
+    - name: Base tasks
+      debug:
+        msg: "Base tasks"
+    - include: base-tasks.yml

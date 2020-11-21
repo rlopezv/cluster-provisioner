@@ -1,0 +1,49 @@
+---
+ - hosts: all
+   # Become root user
+   become: yes
+   # List of tasks to be executed
+   tasks:
+    - name: Base tasks
+      debug:
+        msg: "Base tasks"
+    - include: base-tasks.yml
+
+    - name: Add k8s GPG apt Key
+      apt_key:
+        url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+        state: present
+
+    - name: Add k8s Repository
+      apt_repository:
+        repo: deb http://apt.kubernetes.io/ kubernetes-xenial main
+        state: present
+
+    - name: Update apt and install kubectl
+      apt: 
+        update_cache: yes
+        name: "{{ packages }}"
+        state: latest
+      vars:
+        packages:
+          - kubectl
+
+    - name: Add Helm apt Key
+      apt_key:
+        url: https://baltocdn.com/helm/signing.asc
+        state: present
+
+    - name: Add Helm Repository
+      apt_repository:
+        repo: deb https://baltocdn.com/helm/stable/debian/ all main
+        state: present
+
+    - name: Update apt and install helm
+      apt: 
+        update_cache: yes
+        name: "{{ packages }}"
+        state: latest
+      vars:
+        packages:
+          - helm
+

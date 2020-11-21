@@ -1,0 +1,166 @@
+---
+   # List of tasks to be executed
+- name: Ensure swap is off
+  become: yes
+  command: "swapoff -a"
+  tags:
+    - k8s
+
+- name: Remove swap from fstab
+  become: yes
+  lineinfile:
+    dest: /etc/fstab
+    regexp: 'swap'
+    state: absent
+  tags:
+    - k8s
+
+- name: 'Populate service facts'
+  service_facts: {}
+
+- name: 'Disable firewalld Services'
+  service:
+    name: "{{item}}"
+    state: stopped
+    enabled: no
+  loop:
+    - firewalld
+  when: ansible_facts.services[item] is defined
+  ignore_errors: yes 
+
+
+- name: Install sudo
+  apt:
+    name: sudo
+
+- name: Create "sudo-nopasswd" group
+  group:
+    name: sudo-nopasswd
+
+- name: Add "sudo-nopasswd" group to "sudoers" file
+  lineinfile:
+    dest: /etc/sudoers
+    line: '%sudo-nopasswd ALL=(ALL:ALL) NOPASSWD:ALL'
+    regexp: '^%sudo-nopasswd'
+
+
+- name: Create "admin" user
+  user:
+    name: admin
+    shell: /bin/bash
+    uid: 10000
+    group: users
+    groups: 
+      - sudo
+    append: true # --> user is not removed from any other group
+    password: $1$T.5/MLaU$lV1PU0UlLz6.KSRKuno451
+
+- name: Remove user "admin" from "sudo-nopasswd" group
+  shell: /usr/sbin/delgroup admin sudo-nopasswd
+  when: not (passwordless_sudo is defined and passwordless_sudo == true)
+  ignore_errors: yes
+
+- name: Add user "admin" to "sudo-nopasswd" group
+  user:
+    name: admin
+    groups: 
+      - sudo-nopasswd
+    append: true # --> user is not removed from any other group
+  when: passwordless_sudo is defined and passwordless_sudo == true
+
+
+- name: Update system
+  become: yes
+  apt: 
+    allow_unauthenticated: true
+    update_cache: yes 
+    force_apt_get: yes 
+    cache_valid_time: 3600
+  tags:
+    - k8s
+
+- name: Ensure Base Tools
+  become: yes
+  apt:
+    name: "{{ packages }}"
+  vars:
+    packages:
+      - ca-certificates
+      - software-properties-common
+      - python3-pip
+      - virtualenv
+      - python3-setuptools
+      - curl
+      - jq
+      - bc
+      - gawk
+      - apt-transport-https
+  tags:
+      - k8s
+
+- name: Add Docker GPG apt Key
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
+- name: Add Docker Repository
+  apt_repository:
+    repo: deb https://download.docker.com/linux/ubuntu bionic stable
+    state: present
+
+- name: Update apt and install docker-ce
+  apt: 
+    update_cache: yes
+    name: "{{ packages }}"
+    state: latest
+  vars:
+    packages:
+      - docker-ce
+      - docker-ce-cli 
+      - containerd.io
+    notify:
+      - docker status
+
+- name: enable docker service
+  service:
+    name: docker
+    enabled: true
+
+- name: restart docker service
+  service:
+    name: docker
+    state: restarted
+
+
+
+# - name: "Create root user's .ssh directory"
+#   file:
+#     path: /root/.ssh
+#     state: directory
+#     owner: root
+#     group: root
+#     mode: 0700
+
+# - name: "Copy root user's authorized_keys"
+#   copy:
+#     src: authorized_keys_root
+#     dest: /root/.ssh/authorized_keys
+#     owner: root
+#     group: root
+#     mode: 0600
+
+# - name: "Create admin user's .ssh directory"
+#   file:
+#     path: /home/admin/.ssh
+#     state: directory
+#     owner: admin
+#     group: users
+#     mode: 0700
+
+# - name: "Copy admin user's authorized_keys"
+#   copy:
+#     src: authorized_keys_sven
+#     dest: /home/admin/.ssh/authorized_keys
+#     owner: admin
+#     group: users
+#     mode: 0600      

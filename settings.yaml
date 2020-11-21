@@ -1,0 +1,4 @@
+num-masters: 0
+num-nodes: 1
+controller: true
+os: "hashicorp/bionic64"
