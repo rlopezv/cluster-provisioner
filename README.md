@@ -1,5 +1,4 @@
-TODO
-ansible
+
 
 TODO
 En controller:
@@ -11,7 +10,7 @@ ssh-copy-id <user>@<server>
 
 Kubespray
 
-https://github.com/kubernetes-sigs/kubespray
+## Quick Start
 
 # clone the remote repository
 $ git clone https://github.com/kubernetes-sigs/kubespray.git
