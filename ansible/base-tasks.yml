@@ -44,9 +44,9 @@
     regexp: '^%sudo-nopasswd'
 
 
-- name: Create "admin" user
+- name: Create "ubuntu" user
   user:
-    name: admin
+    name: ubuntu
     shell: /bin/bash
     uid: 10000
     group: users
@@ -55,14 +55,14 @@
     append: true # --> user is not removed from any other group
     password: $1$T.5/MLaU$lV1PU0UlLz6.KSRKuno451
 
-- name: Remove user "admin" from "sudo-nopasswd" group
-  shell: /usr/sbin/delgroup admin sudo-nopasswd
+- name: Remove user "ubuntu" from "sudo-nopasswd" group
+  shell: /usr/sbin/delgroup ubuntu sudo-nopasswd
   when: not (passwordless_sudo is defined and passwordless_sudo == true)
   ignore_errors: yes
 
 - name: Add user "admin" to "sudo-nopasswd" group
   user:
-    name: admin
+    name: ubuntu
     groups: 
       - sudo-nopasswd
     append: true # --> user is not removed from any other group
@@ -132,6 +132,12 @@
     state: restarted
 
 
+- name: Add user "admin" to "docker" group
+  user:
+    name: ubuntu
+    groups: 
+      - docker
+    append: true # --> user is not removed from any other group
 
 # - name: "Create root user's .ssh directory"
 #   file:

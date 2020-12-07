@@ -14,7 +14,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     config.ssh.insert_key = false
 
     config.vm.provider "virtualbox" do |v|
-        v.memory = 3072
+        v.memory = 4096
         v.cpus = 2
     end
       
@@ -27,12 +27,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
             if Vagrant.has_plugin?("vagrant-hosts")
                 node.vm.provision :hosts, :sync_hosts => true, :add_local_hostnames => false
             end
-            # node.vm.provision "ansible" do |ansible|
-            #      ansible.playbook = "ansible/master-playbook.yml"
-            #      ansible.extra_vars = {
-            #          node_ip: "192.168.50.#{i + 10}",
-            #      }
-            # end
+            node.vm.provision "ansible" do |ansible|
+                 ansible.playbook = "ansible/master-playbook.yml"
+                 ansible.extra_vars = {
+                     node_ip: "192.168.50.#{i + 10}",
+                 }
+            end
         end
     end
 

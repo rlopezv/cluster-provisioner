@@ -1,4 +1,4 @@
-num-masters: 1
-num-nodes: 2
-controller: true
+num-masters: 1 
+num-nodes: 2 
+controller: false
 os: "hashicorp/bionic64"

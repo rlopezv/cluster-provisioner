@@ -4,7 +4,7 @@ TODO
 En controller:
 process known_hosts
 allow remote passwordless login
-ssh-keygen
+ssh-keygen 
 ssh-copy-id <user>@<server>
 
 
