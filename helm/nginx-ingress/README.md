@@ -46,7 +46,4 @@ Check installation
 ```
 kubectl create -f test
 
-kubectl describe certificate -n cert-manager-test
-```
 
-Create a cluster-issuer
